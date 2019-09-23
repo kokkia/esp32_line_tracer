@@ -1,7 +1,12 @@
 #include "kal/kal.h"
 
-#define DEBUG 1
-#define ADC_DEBUG 0
+#define DEBUG 0
+#define ADC_DEBUG 1
+
+//光センサ
+#define LIGHT_SENSOR_L 14
+#define LIGHT_SENSOR_R 27
+int offset = 350;
 
 //motor
 #define MOTOR_NUM 4
@@ -33,11 +38,10 @@ void IRAM_ATTR onTimer() {  /* this function must be placed in IRAM */
   //control---------------------------------------------------------------------------------------------------------------------------/
   t += Ts;
   //状態取得
-//  motor[0].get_angle(state[0].theta);
-//  motor[1].get_angle(state[1].theta);
-//  motor[2].get_angle(state[2].theta);
-//  motor[3].get_angle(state[3].theta);
-
+  int light_sensor_l = analogRead(LIGHT_SENSOR_L);
+  int light_sensor_r = analogRead(LIGHT_SENSOR_R);
+  int error = light_sensor_l - light_sensor_r + offset;
+  
   for(int i=0;i<MOTOR_NUM;i++){
     motor[i].get_angle(state[i].theta);  
   }
@@ -54,10 +58,14 @@ void IRAM_ATTR onTimer() {  /* this function must be placed in IRAM */
   }
   
   //出力計算
-  for(int i=0;i<MOTOR_NUM;i++){
-    double u = KP*(ref[i].theta-state[i].theta) + KD * (ref[i].dtheta - state[i].dtheta);
-    motor[i].drive(u);
-  }
+//  for(int i=0;i<MOTOR_NUM;i++){
+//    //double u = KP*(ref[i].theta-state[i].theta) + KD * (ref[i].dtheta - state[i].dtheta);
+//    motor[i].drive(u);
+//  }
+  double u = 0.02 * error;
+  motor[0].drive(-(3.0 - u));
+  motor[1].drive(-(3.0 + u));
+
 #if DEBUG
   for(int i=0;i<MOTOR_NUM;i++){
     Serial.print(ref[i].theta*RAD2DEG);
@@ -68,12 +76,11 @@ void IRAM_ATTR onTimer() {  /* this function must be placed in IRAM */
   Serial.println();
 #endif
 #if ADC_DEBUG
-  int ain1 = analogRead(14);
-  int ain2 = analogRead(27);
-  Serial.print(ain1);
+  Serial.print(light_sensor_l);
   Serial.print(",");
-  Serial.print(ain2);     
+  Serial.print(light_sensor_r);     
   Serial.print(",");
+  Serial.print(error);     
   Serial.println();
 #endif
   //-------------------------------------------------------------------------------------------------------------------------------------/
