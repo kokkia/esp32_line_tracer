@@ -45,7 +45,6 @@ void IRAM_ATTR onTimer() {  /* this function must be placed in IRAM */
   for(int i=0;i<MOTOR_NUM;i++){
     motor[i].get_angle(state[i].theta);  
   }
-
   for(int i=0;i<MOTOR_NUM;i++){
     dtheta_st[i].update(state[i].theta,state[i].dtheta);  
   }  
