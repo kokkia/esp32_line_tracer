@@ -1,7 +1,7 @@
 #include "kal/kal.h"
 
-#define DEBUG 0
-#define ADC_DEBUG 1
+#define DEBUG 1
+#define ADC_DEBUG 0
 
 //光センサ
 #define LIGHT_SENSOR_L 14
@@ -17,7 +17,7 @@ kal::nxtmotor motor[MOTOR_NUM];//4 motor
 #define KDD 0.05
 
 //reference
-kal::wave sin_wave(0.0,PI/3,0.5,SIN);
+kal::wave sin_wave(0.0,PI/3,0.5,TRIANGLE);
 
 //robotdata
 kal::RobotData<double> ref[MOTOR_NUM];
@@ -69,8 +69,8 @@ void IRAM_ATTR onTimer() {  /* this function must be placed in IRAM */
   for(int i=0;i<MOTOR_NUM;i++){
     Serial.print(ref[i].theta*RAD2DEG);
     Serial.print(",");
-    Serial.print(state[i].theta*RAD2DEG);     
-    Serial.print(",");
+//    Serial.print(state[i].theta*RAD2DEG);     
+//    Serial.print(",");
   }
   Serial.println();
 #endif
