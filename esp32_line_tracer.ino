@@ -9,7 +9,7 @@
 int offset = 350;
 
 //motor
-#define MOTOR_NUM 4
+#define MOTOR_NUM 1//4
 kal::nxtmotor motor[MOTOR_NUM];//4 motor
 //motor control gain
 #define KP 30.0
@@ -17,7 +17,7 @@ kal::nxtmotor motor[MOTOR_NUM];//4 motor
 #define KDD 0.05
 
 //reference
-kal::wave sin_wave(0.0,PI/3,0.5,TRIANGLE);
+kal::wave sin_wave(0.0,PI/3,0.5,SIN);
 
 //robotdata
 kal::RobotData<double> ref[MOTOR_NUM];
@@ -57,20 +57,20 @@ void IRAM_ATTR onTimer() {  /* this function must be placed in IRAM */
   }
   
   //出力計算
-//  for(int i=0;i<MOTOR_NUM;i++){
-//    //double u = KP*(ref[i].theta-state[i].theta) + KD * (ref[i].dtheta - state[i].dtheta);
-//    motor[i].drive(u);
-//  }
-  double u = 0.02 * error;
-  motor[0].drive(-(3.0 - u));
-  motor[1].drive(-(3.0 + u));
+  for(int i=0;i<MOTOR_NUM;i++){
+    double u = KP*(ref[i].theta-state[i].theta) + KD * (ref[i].dtheta - state[i].dtheta);
+    motor[i].drive(u);
+  }
+//  double u = 0.02 * error;
+//  motor[0].drive(-(3.0 - u));
+//  motor[1].drive(-(3.0 + u));
 
 #if DEBUG
   for(int i=0;i<MOTOR_NUM;i++){
     Serial.print(ref[i].theta*RAD2DEG);
     Serial.print(",");
-//    Serial.print(state[i].theta*RAD2DEG);     
-//    Serial.print(",");
+    Serial.print(state[i].theta*RAD2DEG);     
+    Serial.print(",");
   }
   Serial.println();
 #endif
@@ -94,18 +94,18 @@ void setup() {
   motor[0].GPIO_setup(GPIO_NUM_4,GPIO_NUM_0);//方向制御ピン設定
   motor[0].PWM_setup(GPIO_NUM_2,0);//PWMピン設定
   motor[0].encoder_setup(PCNT_UNIT_0,GPIO_NUM_36,GPIO_NUM_39);//エンコーダカウンタ設定
-  //motor2
-  motor[1].GPIO_setup(GPIO_NUM_16,GPIO_NUM_17);//方向制御ピン設定
-  motor[1].PWM_setup(GPIO_NUM_15,0);//PWMピン設定
-  motor[1].encoder_setup(PCNT_UNIT_1,GPIO_NUM_34,GPIO_NUM_35);//エンコーダカウンタ設定
-  //motor3
-  motor[2].GPIO_setup(GPIO_NUM_5,GPIO_NUM_21);//方向制御ピン設定
-  motor[2].PWM_setup(GPIO_NUM_13,0);//PWMピン設定
-  motor[2].encoder_setup(PCNT_UNIT_2,GPIO_NUM_32,GPIO_NUM_33);//エンコーダカウンタ設定
-  //motor4
-  motor[3].GPIO_setup(GPIO_NUM_22,GPIO_NUM_23);//方向制御ピン設定
-  motor[3].PWM_setup(GPIO_NUM_12,0);//PWMピン設定
-  motor[3].encoder_setup(PCNT_UNIT_3,GPIO_NUM_25,GPIO_NUM_26);//エンコーダカウンタ設定
+//  //motor2
+//  motor[1].GPIO_setup(GPIO_NUM_16,GPIO_NUM_17);//方向制御ピン設定
+//  motor[1].PWM_setup(GPIO_NUM_15,0);//PWMピン設定
+//  motor[1].encoder_setup(PCNT_UNIT_1,GPIO_NUM_34,GPIO_NUM_35);//エンコーダカウンタ設定
+//  //motor3
+//  motor[2].GPIO_setup(GPIO_NUM_5,GPIO_NUM_21);//方向制御ピン設定
+//  motor[2].PWM_setup(GPIO_NUM_13,0);//PWMピン設定
+//  motor[2].encoder_setup(PCNT_UNIT_2,GPIO_NUM_32,GPIO_NUM_33);//エンコーダカウンタ設定
+//  //motor4
+//  motor[3].GPIO_setup(GPIO_NUM_22,GPIO_NUM_23);//方向制御ピン設定
+//  motor[3].PWM_setup(GPIO_NUM_12,0);//PWMピン設定
+//  motor[3].encoder_setup(PCNT_UNIT_3,GPIO_NUM_25,GPIO_NUM_26);//エンコーダカウンタ設定
 
   //timer割り込み設定
   timer = timerBegin(0, 80, true);//プリスケーラ設定
