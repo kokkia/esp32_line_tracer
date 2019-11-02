@@ -47,6 +47,7 @@ void IRAM_ATTR onTimer() {  /* this function must be placed in IRAM */
   }
   for(int i=0;i<MOTOR_NUM;i++){
     dtheta_st[i].update(state[i].theta,state[i].dtheta);  
+    motor[0].state.dq = state[i].dtheta;
   }  
   
   //目標値計算
@@ -54,12 +55,15 @@ void IRAM_ATTR onTimer() {  /* this function must be placed in IRAM */
   for(int i=0;i<MOTOR_NUM;i++){
     ref[i].theta = sin_wave.output;
     dtheta_ref[i].update(ref[i].theta,ref[i].dtheta);
+    motor[i].ref.q = ref[i].theta;
+    motor[i].ref.dq = ref[i].dtheta;
   }
   
   //出力計算
   for(int i=0;i<MOTOR_NUM;i++){
-    double u = KP*(ref[i].theta-state[i].theta) + KD * (ref[i].dtheta - state[i].dtheta);
-    motor[i].drive(u);
+    //double u = KP*(ref[i].theta-state[i].theta) + KD * (ref[i].dtheta - state[i].dtheta);
+    motor[i].position_control();
+    motor[i].drive(motor[i].output);
   }
 //  double u = 0.02 * error;
 //  motor[0].drive(-(3.0 - u));
@@ -94,6 +98,10 @@ void setup() {
   motor[0].GPIO_setup(GPIO_NUM_4,GPIO_NUM_0);//方向制御ピン設定
   motor[0].PWM_setup(GPIO_NUM_2,0);//PWMピン設定
   motor[0].encoder_setup(PCNT_UNIT_0,GPIO_NUM_36,GPIO_NUM_39);//エンコーダカウンタ設定
+  motor[0].set_fb_v_param(0.8,0.0,1.7);
+  motor[0].set_fb_param(30,0.0,5.0);
+  motor[0].set_fb_cc_param(30.0,0.0);
+  
 //  //motor2
 //  motor[1].GPIO_setup(GPIO_NUM_16,GPIO_NUM_17);//方向制御ピン設定
 //  motor[1].PWM_setup(GPIO_NUM_15,0);//PWMピン設定
