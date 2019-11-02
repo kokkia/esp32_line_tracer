@@ -17,7 +17,7 @@ kal::nxtmotor motor[MOTOR_NUM];//4 motor
 #define KDD 0.05
 
 //reference
-kal::wave sin_wave(0.0,PI/3,0.5,SIN);
+kal::wave sin_wave(0.0,PI/3,0.5,CHARPSIN);
 
 //robotdata
 kal::RobotData<double> ref[MOTOR_NUM];
