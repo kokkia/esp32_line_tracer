@@ -45,17 +45,17 @@ void setup() {
   brobot.motor[0].GPIO_setup(GPIO_NUM_4,GPIO_NUM_0);//方向制御ピン設定
   brobot.motor[0].PWM_setup(GPIO_NUM_2,0);//PWMピン設定
   brobot.motor[0].encoder_setup(PCNT_UNIT_0,GPIO_NUM_36,GPIO_NUM_39);//エンコーダカウンタ設定
-  brobot.motor[0].set_fb_v_param(0.8,0.0,1.7);
+  brobot.motor[0].set_fb_v_param(10.0,1.0,0.0);
   brobot.motor[0].set_fb_param(30,0.0,5.0);
-  brobot.motor[0].set_fb_cc_param(30.0,0.0);
+  brobot.motor[0].set_fb_cc_param(50.0,0.0);
 
 //  //motor2
   brobot.motor[1].GPIO_setup(GPIO_NUM_16,GPIO_NUM_17);//方向制御ピン設定
   brobot.motor[1].PWM_setup(GPIO_NUM_15,0);//PWMピン設定
   brobot.motor[1].encoder_setup(PCNT_UNIT_1,GPIO_NUM_34,GPIO_NUM_35);//エンコーダカウンタ設定
-  brobot.motor[1].set_fb_v_param(0.8,0.0,1.7);
+  brobot.motor[1].set_fb_v_param(10.0,1.0,0.0);
   brobot.motor[1].set_fb_param(30,0.0,5.0);
-  brobot.motor[1].set_fb_cc_param(30.0,0.0);
+  brobot.motor[1].set_fb_cc_param(50.0,0.0);
 //  //motor3
 //  motor[2].GPIO_setup(GPIO_NUM_5,GPIO_NUM_21);//方向制御ピン設定
 //  motor[2].PWM_setup(GPIO_NUM_13,0);//PWMピン設定
@@ -97,18 +97,21 @@ void loop() {
     sin_wave.update();
     brobot.ref.x = sin_wave.output;
     dx_ref.update(brobot.ref.x,brobot.ref.dx);
+    //brobot.motor[0].ref.dq = sin_wave.output/30*PI;
   
     //出力計算
     brobot.position_control(brobot.ref.x);
-  //  brobot.motor[0].position_control();
-  //  brobot.motor[0].drive(brobot.motor[0].output);
+    //brobot.motor[0].drive(brobot.motor[0].velocity_control());
 
 #if DEBUG
-    for(int i=0;i<MOTOR_NUM;i++){
+    for(int i=0;i<MOTOR_NUM-1;i++){
       Serial.print(brobot.motor[i].ref.q * RAD2DEG);
       Serial.print(",");
       Serial.print(brobot.motor[i].state.q * RAD2DEG);     
       Serial.print(",");
+      //Serial.print(brobot.motor[i].output);     
+      //Serial.print(",");
+      
     }
     Serial.println();
 #endif
