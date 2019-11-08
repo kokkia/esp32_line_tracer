@@ -3,7 +3,7 @@
 
 #define DEBUG 0
 #define ADC_DEBUG 1
-#define COLOR 0
+#define COLOR 1
 
 //光センサ
 #define LIGHT_SENSOR_L 14
@@ -166,7 +166,7 @@ void loop() {
     Serial.print(light_sensor_r);     
     Serial.print(",");
 //    Serial.print(error);     
-    Serial.println();
+    //Serial.println();
 #endif
         
   }//制御周期
@@ -214,7 +214,7 @@ void read_color(void){
     Serial.print(" a:");
     Serial.print(a);
     cl1.a = a;
-    Serial.println("");
+    //Serial.println("");
   }
   Wire.endTransmission();
   
