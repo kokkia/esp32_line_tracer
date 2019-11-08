@@ -1,9 +1,9 @@
 #include "kal/kal.h"
-#include<Wire.h>
+//#include<Wire.h>
 
 #define DEBUG 0
-#define ADC_DEBUG 1
-#define COLOR 0
+#define ADC_DEBUG 0
+#define COLOR 1
 
 //光センサ
 #define LIGHT_SENSOR_L 14
@@ -16,16 +16,16 @@ int offset = 350;
 #define SCL_PIN_COLOR_1 22//22
 #define SDA_PIN_COLOR_2 26//21
 #define SCL_PIN_COLOR_2 25//22
-TwoWire Wire2( 1 );//2個目のカラーセンサI2C
-class color_data{
-  public:
-  int r;
-  int g;
-  int b;
-  int a;
-};
+//TwoWire Wire2( 1 );//2個目のカラーセンサI2C
+//class color_data{
+//  public:
+//  int r;
+//  int g;
+//  int b;
+//  int a;
+//};
 
-color_data cl1,cl2;
+kal::color_sensor color[2];
 
 //wave
 kal::wave sin_wave(0.0,30,0.5,SIN);
@@ -89,24 +89,26 @@ void setup() {
   brobot.set_param(82.0/2.0,200.0,1.0);
 
 #if COLOR
-  Wire.begin(SDA_PIN_COLOR_1, SCL_PIN_COLOR_1); // SDA, SCL
-  Wire2.begin(SDA_PIN_COLOR_2, SCL_PIN_COLOR_2); // SDA, SCL
-  Wire.beginTransmission(0x2A);
-  Wire.write(0x0);
-  Wire.write(0x89);
-  Wire.endTransmission();
-  Wire.beginTransmission(0x2A);
-  Wire.write(0x0);
-  Wire.write(0x09);
-  Wire.endTransmission();
-  Wire2.beginTransmission(0x2A);
-  Wire2.write(0x0);
-  Wire2.write(0x89);
-  Wire2.endTransmission();
-  Wire2.beginTransmission(0x2A);
-  Wire2.write(0x0);
-  Wire2.write(0x09);
-  Wire2.endTransmission();
+//  Wire.begin(SDA_PIN_COLOR_1, SCL_PIN_COLOR_1); // SDA, SCL
+//  Wire2.begin(SDA_PIN_COLOR_2, SCL_PIN_COLOR_2); // SDA, SCL
+//  Wire.beginTransmission(0x2A);
+//  Wire.write(0x0);
+//  Wire.write(0x89);
+//  Wire.endTransmission();
+//  Wire.beginTransmission(0x2A);
+//  Wire.write(0x0);
+//  Wire.write(0x09);
+//  Wire.endTransmission();
+//  Wire2.beginTransmission(0x2A);
+//  Wire2.write(0x0);
+//  Wire2.write(0x89);
+//  Wire2.endTransmission();
+//  Wire2.beginTransmission(0x2A);
+//  Wire2.write(0x0);
+//  Wire2.write(0x09);
+//  Wire2.endTransmission();
+   color[0].I2C_setup(SDA_PIN_COLOR_1, SCL_PIN_COLOR_1);
+   color[1].I2C_setup(SDA_PIN_COLOR_2, SCL_PIN_COLOR_2);
 #endif
 
   //timer割り込み設定
@@ -123,7 +125,7 @@ void loop() {
     int light_sensor_l = analogRead(LIGHT_SENSOR_L);
     int light_sensor_c = analogRead(LIGHT_SENSOR_C);
     int light_sensor_r = analogRead(LIGHT_SENSOR_R);
-    read_color();
+//    read_color();
     
 //    int error = light_sensor_l - light_sensor_r + offset;
   
@@ -168,14 +170,16 @@ void loop() {
 //    Serial.print(error);     
     Serial.println();
 #endif
-        
+#if COLOR
+
+#endif
   }//制御周期
   else{//その他の処理
     
   }
 }
 
-
+/*
 void read_color(void){
   //r:赤 g:緑 b:青 a:赤外
   int r,g,b,a;
@@ -251,4 +255,4 @@ void read_color(void){
     Serial.println("");
   }
   Wire2.endTransmission();
-}
+}*/
