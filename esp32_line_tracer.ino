@@ -3,28 +3,19 @@
 
 #define DEBUG 0
 #define ADC_DEBUG 0
-#define COLOR 1
+#define COLOR_DEBUG 1
 
 //光センサ
 #define LIGHT_SENSOR_L 14
 #define LIGHT_SENSOR_C 27
-#define LIGHT_SENSOR_R 4//27
+#define LIGHT_SENSOR_R 4
 int offset = 350;
 
 //カラーセンサ
-#define SDA_PIN_COLOR_1 23//21
-#define SCL_PIN_COLOR_1 22//22
-#define SDA_PIN_COLOR_2 26//21
-#define SCL_PIN_COLOR_2 25//22
-//TwoWire Wire2( 1 );//2個目のカラーセンサI2C
-//class color_data{
-//  public:
-//  int r;
-//  int g;
-//  int b;
-//  int a;
-//};
-
+#define SDA_PIN_COLOR_1 23
+#define SCL_PIN_COLOR_1 22
+#define SDA_PIN_COLOR_2 26
+#define SCL_PIN_COLOR_2 25
 kal::color_sensor color[2];
 
 //wave
@@ -88,28 +79,11 @@ void setup() {
   //brobot.set_param(56.0/2.0,200.0,3.0/5.0);//バリシャコタン
   brobot.set_param(82.0/2.0,200.0,1.0);
 
-#if COLOR
-//  Wire.begin(SDA_PIN_COLOR_1, SCL_PIN_COLOR_1); // SDA, SCL
-//  Wire2.begin(SDA_PIN_COLOR_2, SCL_PIN_COLOR_2); // SDA, SCL
-//  Wire.beginTransmission(0x2A);
-//  Wire.write(0x0);
-//  Wire.write(0x89);
-//  Wire.endTransmission();
-//  Wire.beginTransmission(0x2A);
-//  Wire.write(0x0);
-//  Wire.write(0x09);
-//  Wire.endTransmission();
-//  Wire2.beginTransmission(0x2A);
-//  Wire2.write(0x0);
-//  Wire2.write(0x89);
-//  Wire2.endTransmission();
-//  Wire2.beginTransmission(0x2A);
-//  Wire2.write(0x0);
-//  Wire2.write(0x09);
-//  Wire2.endTransmission();
-   color[0].I2C_setup(SDA_PIN_COLOR_1, SCL_PIN_COLOR_1);
-   color[1].I2C_setup(SDA_PIN_COLOR_2, SCL_PIN_COLOR_2);
-#endif
+  //カラーセンサの設定
+  color[0].I2C_setup(SDA_PIN_COLOR_1, SCL_PIN_COLOR_1,0);
+  color[1].I2C_setup(SDA_PIN_COLOR_2, SCL_PIN_COLOR_2,1);
+  kal::color_sensor_init(color[0]);
+  kal::color_sensor_init(color[1]);
 
   //timer割り込み設定
   timer = timerBegin(0, 80, true);//プリスケーラ設定
@@ -125,7 +99,8 @@ void loop() {
     int light_sensor_l = analogRead(LIGHT_SENSOR_L);
     int light_sensor_c = analogRead(LIGHT_SENSOR_C);
     int light_sensor_r = analogRead(LIGHT_SENSOR_R);
-//    read_color();
+    color[0].read_color();
+    color[1].read_color();
     
 //    int error = light_sensor_l - light_sensor_r + offset;
   
@@ -153,10 +128,7 @@ void loop() {
       Serial.print(brobot.motor[i].ref.q * RAD2DEG);
       Serial.print(",");
       Serial.print(brobot.motor[i].state.q * RAD2DEG);     
-      Serial.print(",");
-      //Serial.print(brobot.motor[i].output);     
-      //Serial.print(",");
-      
+      Serial.print(",");      
     }
     Serial.println();
 #endif
@@ -170,89 +142,10 @@ void loop() {
 //    Serial.print(error);     
     Serial.println();
 #endif
-#if COLOR
-
+#if COLOR_DEBUG
 #endif
   }//制御周期
   else{//その他の処理
     
   }
 }
-
-/*
-void read_color(void){
-  //r:赤 g:緑 b:青 a:赤外
-  int r,g,b,a;
-  int h,l;
-  Wire.beginTransmission(0x2A);
-  Wire.write(0x03);
-  Wire.endTransmission();
-  Wire.requestFrom(0x2A,8);
-  Serial.print(" 1: ");
-  if(Wire.available()){
-    //赤
-    h = Wire.read();
-    l = Wire.read();
-    r = h << 8|l;
-    Serial.print("r:");
-    Serial.print(r);
-    cl1.r = r;
-    //緑
-    h = Wire.read();
-    l = Wire.read();
-    g = h << 8|l;
-    Serial.print(" g:");
-    Serial.print(g);
-    cl1.g = g;
-    //青
-    h = Wire.read();
-    b = Wire.read();
-    r = h << 8|l;
-    Serial.print(" b:");
-    Serial.print(b);
-    cl1.b = b;
-    //赤外
-    h = Wire.read();
-    l = Wire.read();
-    a = h << 8|l;
-    Serial.print(" a:");
-    Serial.print(a);
-    cl1.a = a;
-    Serial.println("");
-  }
-  Wire.endTransmission();
-  
-  Serial.print(" 2: ");
-  Wire2.beginTransmission(0x2A);
-  Wire2.write(0x03);
-  Wire2.endTransmission();
-  Wire2.requestFrom(0x2A,8);
-  if(Wire2.available()){
-    //赤
-    h = Wire2.read();
-    l = Wire2.read();
-    r = h << 8|l;
-    Serial.print("r:");
-    Serial.print(r);
-    //緑
-    h = Wire2.read();
-    l = Wire2.read();
-    g = h << 8|l;
-    Serial.print(" g:");
-    Serial.print(g);
-    //青
-    h = Wire2.read();
-    b = Wire2.read();
-    r = h << 8|l;
-    Serial.print(" b:");
-    Serial.print(b);
-    //赤外
-    h = Wire2.read();
-    l = Wire2.read();
-    a = h << 8|l;
-    Serial.print(" a:");
-    Serial.print(a);
-    Serial.println("");
-  }
-  Wire2.endTransmission();
-}*/
