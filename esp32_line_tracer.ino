@@ -104,7 +104,7 @@ void loop() {
     //brobot.motor[0].drive(brobot.motor[0].velocity_control());
 
 #if DEBUG
-    for(int i=0;i<MOTOR_NUM-1;i++){
+    for(int i=0;i<MOTOR_NUM;i++){
       Serial.print(brobot.motor[i].ref.q * RAD2DEG);
       Serial.print(",");
       Serial.print(brobot.motor[i].state.q * RAD2DEG);     
