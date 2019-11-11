@@ -1,12 +1,22 @@
 #include "kal/kal.h"
+//#include<Wire.h>
 
-#define DEBUG 1
+#define DEBUG 0
 #define ADC_DEBUG 0
+#define COLOR_DEBUG 1
 
 //光センサ
 #define LIGHT_SENSOR_L 14
-#define LIGHT_SENSOR_R 27
+#define LIGHT_SENSOR_C 27
+#define LIGHT_SENSOR_R 4
 int offset = 350;
+
+//カラーセンサ
+#define SDA_PIN_COLOR_1 23
+#define SCL_PIN_COLOR_1 22
+#define SDA_PIN_COLOR_2 26
+#define SCL_PIN_COLOR_2 25
+kal::color_sensor color[2];
 
 //wave
 kal::wave sin_wave(0.0,30,0.5,SIN);
@@ -41,21 +51,21 @@ void setup() {
   Serial.begin(115200);
   Serial.println("started");
   
-  //motor1の設定
-  brobot.motor[0].GPIO_setup(GPIO_NUM_4,GPIO_NUM_0);//方向制御ピン設定
-  brobot.motor[0].PWM_setup(GPIO_NUM_2,0);//PWMピン設定
-  brobot.motor[0].encoder_setup(PCNT_UNIT_0,GPIO_NUM_36,GPIO_NUM_39);//エンコーダカウンタ設定
-  brobot.motor[0].set_fb_v_param(10.0,1.0,0.0);
-  brobot.motor[0].set_fb_param(30,0.0,5.0);
-  brobot.motor[0].set_fb_cc_param(50.0,0.0);
-
-//  //motor2
-  brobot.motor[1].GPIO_setup(GPIO_NUM_16,GPIO_NUM_17);//方向制御ピン設定
-  brobot.motor[1].PWM_setup(GPIO_NUM_15,0);//PWMピン設定
-  brobot.motor[1].encoder_setup(PCNT_UNIT_1,GPIO_NUM_34,GPIO_NUM_35);//エンコーダカウンタ設定
-  brobot.motor[1].set_fb_v_param(10.0,1.0,0.0);
-  brobot.motor[1].set_fb_param(30,0.0,5.0);
-  brobot.motor[1].set_fb_cc_param(50.0,0.0);
+//  //motor1の設定
+//  brobot.motor[0].GPIO_setup(GPIO_NUM_4,GPIO_NUM_0);//方向制御ピン設定
+//  brobot.motor[0].PWM_setup(GPIO_NUM_2,0);//PWMピン設定
+//  brobot.motor[0].encoder_setup(PCNT_UNIT_0,GPIO_NUM_36,GPIO_NUM_39);//エンコーダカウンタ設定
+//  brobot.motor[0].set_fb_v_param(10.0,1.0,0.0);
+//  brobot.motor[0].set_fb_param(30,0.0,5.0);
+//  brobot.motor[0].set_fb_cc_param(50.0,0.0);
+//
+////  //motor2
+//  brobot.motor[1].GPIO_setup(GPIO_NUM_16,GPIO_NUM_17);//方向制御ピン設定
+//  brobot.motor[1].PWM_setup(GPIO_NUM_15,0);//PWMピン設定
+//  brobot.motor[1].encoder_setup(PCNT_UNIT_1,GPIO_NUM_34,GPIO_NUM_35);//エンコーダカウンタ設定
+//  brobot.motor[1].set_fb_v_param(10.0,1.0,0.0);
+//  brobot.motor[1].set_fb_param(30,0.0,5.0);
+//  brobot.motor[1].set_fb_cc_param(50.0,0.0);
 //  //motor3
 //  motor[2].GPIO_setup(GPIO_NUM_5,GPIO_NUM_21);//方向制御ピン設定
 //  motor[2].PWM_setup(GPIO_NUM_13,0);//PWMピン設定
@@ -69,6 +79,12 @@ void setup() {
   //brobot.set_param(56.0/2.0,200.0,3.0/5.0);//バリシャコタン
   brobot.set_param(82.0/2.0,200.0,1.0);
 
+  //カラーセンサの設定
+  color[0].I2C_setup(SDA_PIN_COLOR_1, SCL_PIN_COLOR_1,0);
+  color[1].I2C_setup(SDA_PIN_COLOR_2, SCL_PIN_COLOR_2,1);
+  kal::color_sensor_init(color[0]);
+  kal::color_sensor_init(color[1]);
+
   //timer割り込み設定
   timer = timerBegin(0, 80, true);//プリスケーラ設定
   timerAttachInterrupt(timer, &onTimer, true);//割り込み関数指定
@@ -80,50 +96,54 @@ void loop() {
     timer_flag = 0;
 
     //状態取得---------------------------------------------------------------------------//
-//    int light_sensor_l = analogRead(LIGHT_SENSOR_L);
-//    int light_sensor_r = analogRead(LIGHT_SENSOR_R);
+    int light_sensor_l = analogRead(LIGHT_SENSOR_L);
+    int light_sensor_c = analogRead(LIGHT_SENSOR_C);
+    int light_sensor_r = analogRead(LIGHT_SENSOR_R);
+    color[0].read_color();
+    color[1].read_color();
+    
 //    int error = light_sensor_l - light_sensor_r + offset;
   
-    for(int i=0;i<MOTOR_NUM;i++){
-      brobot.motor[i].get_angle(brobot.motor[i].state.q);  
-    }
-    for(int i=0;i<MOTOR_NUM;i++){
-      dtheta_st[i].update(brobot.motor[i].state.q,brobot.motor[i].state.dq);  
-    }
-    brobot.odmetry_update();
-    //------------------------------------------------------------------------------------//
+//    for(int i=0;i<MOTOR_NUM;i++){
+//      brobot.motor[i].get_angle(brobot.motor[i].state.q);  
+//    }
+//    for(int i=0;i<MOTOR_NUM;i++){
+//      dtheta_st[i].update(brobot.motor[i].state.q,brobot.motor[i].state.dq);  
+//    }
+//    brobot.odmetry_update();
+//    //------------------------------------------------------------------------------------//
     
-    //目標値計算
-    sin_wave.update();
-    brobot.ref.x = sin_wave.output;
-    dx_ref.update(brobot.ref.x,brobot.ref.dx);
-    //brobot.motor[0].ref.dq = sin_wave.output/30*PI;
-  
-    //出力計算
-    brobot.position_control(brobot.ref.x);
-    //brobot.motor[0].drive(brobot.motor[0].velocity_control());
-
+//    //目標値計算
+//    sin_wave.update();
+//    brobot.ref.x = sin_wave.output;
+//    dx_ref.update(brobot.ref.x,brobot.ref.dx);
+//    //brobot.motor[0].ref.dq = sin_wave.output/30*PI;
+//  
+//    //出力計算
+//    brobot.position_control(brobot.ref.x);
+//    //brobot.motor[0].drive(brobot.motor[0].velocity_control());
+      
 #if DEBUG
-    for(int i=0;i<MOTOR_NUM;i++){
+    for(int i=0;i<MOTOR_NUM-1;i++){
       Serial.print(brobot.motor[i].ref.q * RAD2DEG);
       Serial.print(",");
       Serial.print(brobot.motor[i].state.q * RAD2DEG);     
-      Serial.print(",");
-      //Serial.print(brobot.motor[i].output);     
-      //Serial.print(",");
-      
+      Serial.print(",");      
     }
     Serial.println();
 #endif
 #if ADC_DEBUG
     Serial.print(light_sensor_l);
     Serial.print(",");
+    Serial.print(light_sensor_c);     
+    Serial.print(",");
     Serial.print(light_sensor_r);     
     Serial.print(",");
-    Serial.print(error);     
+//    Serial.print(error);     
     Serial.println();
 #endif
-        
+#if COLOR_DEBUG
+#endif
   }//制御周期
   else{//その他の処理
     
