@@ -80,10 +80,10 @@ void setup() {
   brobot.set_param(82.0/2.0,200.0,1.0);
 
   //カラーセンサの設定
-  color[0].I2C_setup(SDA_PIN_COLOR_1, SCL_PIN_COLOR_1,0);
-  color[1].I2C_setup(SDA_PIN_COLOR_2, SCL_PIN_COLOR_2,1);
-  kal::color_sensor_init(color[0]);
-  kal::color_sensor_init(color[1]);
+  color[0].I2C_setup(SDA_PIN_COLOR_1, SCL_PIN_COLOR_1);
+  color[1].I2C_setup(SDA_PIN_COLOR_2, SCL_PIN_COLOR_2);
+//  kal::color_sensor_init(color[0]);
+//  kal::color_sensor_init(color[1]);
 
   //timer割り込み設定
   timer = timerBegin(0, 80, true);//プリスケーラ設定
