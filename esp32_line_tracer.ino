@@ -18,17 +18,17 @@ int offset = 350;
 #define SCL_PIN_COLOR_2 25
 kal::color_sensor color[2];
 
-//wave
-kal::wave sin_wave(0.0,30,0.5,SIN);
-
-//robot
-#define MOTOR_NUM 2//4
-kal::two_wheel_drive brobot;
-
-//differentiator
-kal::Diff<double> dtheta_st[MOTOR_NUM];
-kal::Diff<double> dtheta_ref[MOTOR_NUM];
-kal::Diff<double> dx_ref;
+////wave
+//kal::wave sin_wave(0.0,30,0.5,SIN);
+//
+////robot
+//#define MOTOR_NUM 2//4
+//kal::two_wheel_drive brobot;
+//
+////differentiator
+//kal::Diff<double> dtheta_st[MOTOR_NUM];
+//kal::Diff<double> dtheta_ref[MOTOR_NUM];
+//kal::Diff<double> dx_ref;
 
 //時間管理//@todo: freeRTOSの導入検討
 double t = 0.0;//time
@@ -77,14 +77,12 @@ void setup() {
 
   //車体の設定
   //brobot.set_param(56.0/2.0,200.0,3.0/5.0);//バリシャコタン
-  brobot.set_param(82.0/2.0,200.0,1.0);
+  //brobot.set_param(82.0/2.0,200.0,1.0);
 
   //カラーセンサの設定
   color[0].I2C_setup(SDA_PIN_COLOR_1, SCL_PIN_COLOR_1);
   color[1].I2C_setup(SDA_PIN_COLOR_2, SCL_PIN_COLOR_2);
-//  kal::color_sensor_init(color[0]);
-//  kal::color_sensor_init(color[1]);
-
+  
   //timer割り込み設定
   timer = timerBegin(0, 80, true);//プリスケーラ設定
   timerAttachInterrupt(timer, &onTimer, true);//割り込み関数指定
@@ -143,6 +141,20 @@ void loop() {
     Serial.println();
 #endif
 #if COLOR_DEBUG
+    for(int i=0;i<2;i++){
+      Serial.print("num:");
+      Serial.print(color[i].num);
+      Serial.print("r:");
+      Serial.print(color[i].r);
+      Serial.print(" g:");
+      Serial.print(color[i].g);
+      Serial.print(" b:");
+      Serial.print(color[i].b);
+      Serial.print(" a:");
+      Serial.print(color[i].a);
+      Serial.println("");
+    }
+
 #endif
   }//制御周期
   else{//その他の処理
